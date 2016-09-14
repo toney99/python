@@ -1,0 +1,17 @@
+
+product_asin:
+asin:商品编码
+
+
+商品排名 product_rank
+asin：商品编码
+parent_name : 大类
+name_2 : 子类
+name_3 : 子类
+name_4 : 子类
+main_rank : 大类排名
+rank_2 : 子排名
+rank_3 : 子排名
+rank_4 : 子排名
+review_num : 评论数
+rank_time : 时间
