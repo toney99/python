@@ -21,36 +21,38 @@ headers = {
 # 读取https://www.amazon.com/gp/site-directory/中的所有的二级菜单的地址
 # 根据二级菜单的地址获取该菜单下所有子节点的url地址
 # 每个二级菜单下的子菜单位于不同的位置，需要按每个菜单的特点进行解析
-def get_allnode(ch_url):
-	r = requests.get(ch_url, headers=headers)
-	soup = BeautifulSoup(r.text, 'lxml')
+def get_allnode(ch_url, name, parent_name):
+	try:
+		r = requests.get(ch_url, headers=headers)
+		soup = BeautifulSoup(r.text, 'lxml')
+	except:
+		print 'requests error'
+		pass
 	# res = soup.select('div.categoryRefinementsSection > ul > li > a')
 	# res = soup.select('ul.forExpando > li > a')
 	selector = [
+		'div.categoryRefinementsSection > ul > li'
 		'ul.refinementNodeChildren > li > a',
 		'ol.a-carousel > li > a',
 	]
-	node_children = []
-	# node = soup.select('ul.refinementNodeChildren > li > a')
-	# if not node:
-	# 	while select:
-	# 		pass
-	# 	node = soup.select('ol.a-carousel > li > a')
-
 	for s in selector:
 		node = soup.select(s)
 		if node:
-			return
+			# for n in node:
+			# 	print n['href']
+			print name
+			break
 		else:
 			pass
 	if not node:
-		r = requests.get(ch_url, headers=headers)
-		soup = BeautifulSoup(r.text, 'lxml')
-		if not soup.select('div#refinements'):
-			# print '#??#' * 40
-			print ch_url
-			# print '#??#' * 40
-		return
+		print parent_name, name, ch_url
+	# 	r = requests.get(ch_url, headers=headers)
+	# 	soup = BeautifulSoup(r.text, 'lxml')
+	# 	if not soup.select('div#refinements'):
+	# 		# print '#??#' * 40
+	# 		print ch_url
+	# 		# print '#??#' * 40
+	# 	return
 	# for r in node_children:
 	# 	url =  base + r['href']
 	# 	name = r.find('span') and r.find('span').text or ''
@@ -69,12 +71,12 @@ def check_direct_name(name=''):
 		# print '****' * 40
 		# print res.count(), r['parent_name'], r['url']
 		# print '****' * 40
-		get_allnode(r['url'])
+		get_allnode(r['url'], r['name'], r['parent_name'])
 
 # check_direct_name('Home, Garden & Tools')
 parent_name_list = [
 	'Electronics & Computers',
-	# 'Home, Garden & Tools',
+	'Home, Garden & Tools',
 	'Beauty, Health & Grocery',
 	'Toys, Kids & Baby',
 	'Clothing, Shoes & Jewelry',
