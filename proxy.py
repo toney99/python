@@ -6,31 +6,6 @@ import mongo_db
 
 m_url = "http://www.kuaidaili.com/free/outha/{}/"
 
-# <tr class="">
-# <td class="country"><img alt="In" src="http://fs.xicidaili.com/images/flag/in.png"/></td>
-# <td>123.201.99.211</td>
-# <td>8080</td>
-# <td>
-#         印度
-#       </td>
-# <td class="country">高匿</td>
-# <td>HTTP</td>
-# <td class="country">
-# <div class="bar" title="4.968秒">
-# <div class="bar_inner medium" style="width:84%">
-# </div>
-# </div>
-# </td>
-# <td class="country">
-# <div class="bar" title="0.993秒">
-# <div class="bar_inner fast" style="width:99%">
-# </div>
-# </div>
-# </td>
-# <td>1小时</td>
-# <td>16-09-14 21:39</td>
-# </tr>
-
 
 headers = {
 	'Accept':'image/webp,image/*,*/*;q=0.8',
@@ -46,19 +21,20 @@ def get_proxy_id(m_url):
         return
     sheet_tab = mongo_db.mongo_connect('amazon', 'proxy_ip')
     res = soup.select('tbody > tr')
-    # print r.text
     for i in res:
         ip = i.td.text
         port = i.find_all('td')[1].text
-        print ip + ':' + port
+        ip_port = ip + ':' + port
+        print ip_port
         vals = {
-            'ip': ip + ':' + port,
+            'ip': ip_port,
             'used': False,
         }
-        sheet_tab.insert_one(vals)
+        if not sheet_tab.find({'ip':ip_port}).count():
+            sheet_tab.insert_one(vals)
     return True
 
-for n in range(1, 200, 1):
+for n in range(1, 1000, 1):
     m_url = m_url.format(n)
     get_proxy_id(m_url)
     delay = random.random() * 10
