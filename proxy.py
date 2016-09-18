@@ -25,13 +25,16 @@ def get_proxy_id(m_url):
         ip = i.td.text
         port = i.find_all('td')[1].text
         ip_port = ip + ':' + port
-        print ip_port
+        # print ip_port
         vals = {
             'ip': ip_port,
             'used': False,
         }
         if not sheet_tab.find({'ip':ip_port}).count():
             sheet_tab.insert_one(vals)
+	    print ip_port
+	else:
+	    print ip_port + ' is exist...'
     return True
 
 for n in range(1, 1000, 1):
