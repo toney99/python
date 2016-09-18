@@ -20,6 +20,12 @@ headers = {
 	'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.84 Safari/537.36',
 }
 
+selector = [
+	'div.categoryRefinementsSection > ul > li > a',
+	'ul.refinementNodeChildren > li > a',
+	'ol.a-carousel > li > a',
+]
+
 
 # 读取https://www.amazon.com/gp/site-directory/中的所有的二级菜单的地址
 # 根据二级菜单的地址获取该菜单下所有子节点的url地址
@@ -35,15 +41,18 @@ def get_allnode(ch_url, name, parent_name):
 	except:
 		print 'requests error'
 		return
-	selector = [
-		'div.categoryRefinementsSection > ul > li',
-		'ul.refinementNodeChildren > li > a',
-		'ol.a-carousel > li > a',
-	]
+	# selector = [
+	# 	'div.categoryRefinementsSection > ul > li',
+	# 	'ul.refinementNodeChildren > li > a',
+	# 	'ol.a-carousel > li > a',
+	# ]
 	vals = {
 		'parent_name':parent_name,
 		'name':name,
 		'url':ch_url,
+		'final_node':False,
+		'level':1,
+		'count':0,
 	}
 	sheet_tab = mongo_db.mongo_connect('amazon', 'select_url')
 	for s in selector:
@@ -101,5 +110,37 @@ parent_name_list = [
 ]
 for name in parent_name_list:
 	check_direct_name(name)
-# url = "https://www.amazon.com/Camera-Photo-Film-Canon-Sony/b/ref=sd_allcat_p/?ie=UTF8&node=502394"
-# get_allnode(url, 'name', 'parent_name')
+
+sheet_tab = mongo_db.mongo_connect('amazon', 'select_url')
+while sheet_tab.find({'soup':True, 'final_node':False}).count():
+	for s in sheet_tab.find({'soup':True, 'final_node':False}):
+		vals = {
+			'parent_name':s['name'],
+			'level':s['level'] + 1,
+		}
+		url = s['url']
+		try:
+			r = requests.get(url, headers=headers)
+			soup = BeautifulSoup(r.text, 'lxml')
+		except:
+			print "#####get page error"
+			continue
+		for s in selector:
+			node = soup.select(s)
+			if node:
+				for n in node:
+					vals['url'] = base + str(n['href']).strip()
+					vals['soup'] = True
+					vals['final_node'] = False
+					vals['count'] = 0
+					vals['name'] = 'my_name'
+					print '+++++++++++++++++++this is useful...'
+				break
+			else:
+				pass
+
+		if not node:
+			print '#######this is the final node'
+			# sheet_tab.update({'_id':s['_id']}, {'$set': {'final_node': True} })
+
+
