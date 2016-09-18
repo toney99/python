@@ -51,7 +51,8 @@ def get_allnode(ch_url, name, parent_name):
 		if node:
 			print name
 			vals['soup'] = True
-			sheet_tab.insert(vals)
+			if not sheet_tab.find({'url':ch_url}).count():
+				sheet_tab.insert(vals)
 			break
 		else:
 			pass
@@ -59,7 +60,8 @@ def get_allnode(ch_url, name, parent_name):
 		print parent_name, name, ch_url
 		print '****' * 40
 		vals['soup'] = False
-		sheet_tab.insert(vals)
+		if not sheet_tab.find({'url':ch_url}).count():
+			sheet_tab.insert(vals)
 		# time.sleep(30)
 	# for r in node_children:
 	# 	url =  base + r['href']
