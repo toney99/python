@@ -268,6 +268,7 @@ def get_final_node():
 				print "#######this node can't delivery########"
 		# sheet_tab.insert(url_list)
 		level = level + 1
+		break
 		time.sleep(3)
 
 
