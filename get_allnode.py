@@ -190,7 +190,7 @@ def count_used(res):
 			pass
 	return count
 
-def get_final_node()
+def get_final_node():
 	level = 1
 	res = [{
 			'parent_name':'parent_name',
