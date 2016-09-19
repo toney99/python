@@ -3,7 +3,8 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import re
-import get_product,save_asin, mongo_db
+# import get_product,save_asin 
+import mongo_db
 
 url = "https://www.amazon.com/gp/site-directory/"
 # ch_url = "https://www.amazon.com/home-automation-smarthome/b/ref=sd_allcat_homaut?ie=UTF8&node=6563140011"
@@ -47,6 +48,7 @@ def get_page_num(tre_url):
 	r = requests.get(tre_url, headers=headers)
 	soup = BeautifulSoup(r.text, 'lxml')
 	page_num = soup.select('span.pagnDisabled')  # 获取总的页数
+	page = []
 	if not page_num: # 如果没有总的页数，取最后一页的数
 		page_num = soup.select('span.pagnLink > a')
 		page_num = page_num and page_num[-1].text or 1
@@ -57,7 +59,7 @@ def get_page_num(tre_url):
 	print 'page_url_node', page_url_node  
 	if not page_url_node:
 		print '######page node Not Found#####',page
-		return 
+		return False
 	split_eq = page_url_node.split('=')
 	srs = split_eq[2].split('&')[0]
 	rh = split_eq[3].split('&')[0]	
@@ -67,11 +69,12 @@ def get_page_num(tre_url):
 	print 'page_num', page_num
 	for num in range(1, int(page_num), 1):
 		page_url = page_base.format(int(num), ran_num, srs, rh, int(num),qid)
+		page.append(page_url)
 		print 'page_url_new', page_url
-		get_product_list(page_url)
+		# get_product_list(page_url)
 		print '-=-=' * 40
 	print '====' * 40
-	return True
+	return page
 
 # 根据二级菜单获取三级菜单的地址
 def get_tre_menu(ch_url):

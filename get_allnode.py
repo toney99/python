@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import json
 import re
 from random import random,randint
-# import get_product,save_asin, get_two_menu
+import get_two_menu
 import mongo_db
 import time
 
@@ -53,6 +53,7 @@ def get_allnode(ch_url, name, parent_name):
 		'final_node':False,
 		'level':1,
 		'count':0,
+		'used':False,
 	}
 	sheet_tab = mongo_db.mongo_connect('amazon', 'select_url')
 	for s in selector:
@@ -108,12 +109,16 @@ parent_name_list = [
 	'Automotive & Industrial',
 	'Handmade',
 ]
-for name in parent_name_list:
-	check_direct_name(name)
+# for name in parent_name_list:
+# 	check_direct_name(name)
 
 sheet_tab = mongo_db.mongo_connect('amazon', 'select_url')
-while sheet_tab.find({'soup':True, 'final_node':False}).count():
-	for s in sheet_tab.find({'soup':True, 'final_node':False}):
+level = 1
+res = sheet_tab.find({'level':level, 'soup':True, 'final_node':False, 'used':False})
+while res.count():
+	sheet_tab_n = mongo_db.mongo_connect('amazon', 'select_url')
+	url_list = []
+	for s in res:
 		vals = {
 			'parent_name':s['name'],
 			'level':s['level'] + 1,
@@ -125,22 +130,53 @@ while sheet_tab.find({'soup':True, 'final_node':False}).count():
 		except:
 			print "#####get page error"
 			continue
-		for s in selector:
-			node = soup.select(s)
+		# sheet_tab.update({'url':url}, {'$set':{'used':True}})
+		for sel in selector:
+			node = soup.select(sel)
 			if node:
 				for n in node:
-					vals['url'] = base + str(n['href']).strip()
-					vals['soup'] = True
-					vals['final_node'] = False
+					url_c = str(n['href']).strip()
+					# 去掉url中的/162-3723623-3232876?
+					if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
+						continue
+					else:
+						url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
+						# continue
+					vals['url'] = base + url_c
 					vals['count'] = 0
 					vals['name'] = 'my_name'
-					print '+++++++++++++++++++this is useful...'
+					vals['used'] = False
+					span = n.find_all('span')
+					# 判断soup有无span标签。若无，则说明不是子菜单
+					if not span:
+						continue
+					# 是否是最底层的菜单
+					if vals['parent_name'] == vals['url']:
+						vals['soup'] = False
+						vals['final_node'] = True
+						print "******This is ths final node...........#####################################"
+					else:
+						vals['soup'] = True
+						vals['final_node'] = False
+					if not sheet_tab_n.find({'url':vals['url']}).count() and vals['url'] not in url_list:
+						url_list.append(vals)
+						# sheet_tab_n.insert(vals)
+					page = get_two_menu.get_page_num(vals['url'])
+					if page:
+						sheet_tab_page = mongo_db.mongo_connect('amazon', 'page_urls')
+						sheet_tab_page.insert(page)
+					print "####parent_name:", vals['parent_name'] 
+					print vals['level'], vals['url']
+					print '####span:', len(span), span
+					# for p in span:
+					# 	print p.text
+					print '+++++++++++++++++++this is useful+++++++++++++++++++++'
 				break
 			else:
 				pass
 
 		if not node:
 			print '#######this is the final node'
-			# sheet_tab.update({'_id':s['_id']}, {'$set': {'final_node': True} })
-
+	# sheet_tab.insert(url_list)
+	level = level + 1
 
