@@ -181,84 +181,99 @@ parent_name_list = [
 # 	level = level + 1
 
 
+def count_used(res):
+	count = 0
+	for r in res:
+		if not r['used']:
+			count = count + 1
+		else:
+			pass
+	return count
 
-level = 1
-res = [{
-		'parent_name':'parent_name',
-		'name':'name',
-		'url':'https://www.amazon.com/Home-Audio-Electronics/b/ref=sd_allcat_hat?ie=UTF8&node=667846011',
-		'final_node':False,
-		'level':1,
-		'count':0,
-		'used':False,
-	}]
-while True:
-	# sheet_tab = mongo_db.mongo_connect('amazon', 'select_url')
-	# res = sheet_tab.find({'level':level, 'soup':True, 'final_node':False, 'used':False})
-	# sheet_tab_n = mongo_db.mongo_connect('amazon', 'select_url')
-	url_list = []
-	for s in res:
-		if s['used']:
-			continue
-		vals = {
-			'parent_name':s['name'],
-			'level':s['level'] + 1,
-		}
-		url = s['url']
-		try:
-			r = requests.get(url, headers=headers)
-			soup = BeautifulSoup(r.text, 'lxml')
-		except:
-			print "#####get page error"
-			continue
-		s['used'] = True
-		# sheet_tab.update({'url':url}, {'$set':{'used':True}})
-		for sel in selector:
-			node = soup.select(sel)
-			if node:
-				for n in node:
-					url_c = str(n['href']).strip()
-					# 去掉url中的/162-3723623-3232876?
-					if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
-						continue
-					else:
-						url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
-					# continue
-					vals['url'] = base + url_c
-					vals['count'] = 0
-					vals['name'] = 'my_name'
-					vals['used'] = False
-					span = n.find_all('span')
-					# 判断soup有无span标签。若无，则说明不是子菜单
-					if not span:
-						continue
-					# 是否是最底层的菜单
-					if vals['parent_name'] == vals['url']:
-						vals['soup'] = False
-						vals['final_node'] = True
-						print "******This is ths final node...........#####################################"
-					else:
-						vals['soup'] = True
-						vals['final_node'] = False
-					res.append(vals)
-					# if not sheet_tab_n.find({'url':vals['url']}).count() and vals['url'] not in url_list:
-					# 	url_list.append(vals)
-					# sheet_tab_n.insert(vals)
-					# page = get_two_menu.get_page_num(vals['url'])
-					# if page:
-					# 	sheet_tab_page = mongo_db.mongo_connect('amazon', 'page_urls')
-					# 	sheet_tab_page.insert(page)
-					print "####parent_name:", vals['parent_name']
-					print vals['level'], vals['url']
-					print '####span:', len(span), span
-					# for p in span:
-					# 	print p.text
-					print '+++++++++++++++++++this is useful+++++++++++++++++++++'
-				break
-			else:
-				pass
+def get_final_node()
+	level = 1
+	res = [{
+			'parent_name':'parent_name',
+			'name':'name',
+			'url':'https://www.amazon.com/Home-Audio-Electronics/b/ref=sd_allcat_hat?ie=UTF8&node=667846011',
+			'final_node':False,
+			'level':1,
+			'count':0,
+			'used':False,
+		}]
+	while True:
+		# sheet_tab = mongo_db.mongo_connect('amazon', 'select_url')
+		# res = sheet_tab.find({'level':level, 'soup':True, 'final_node':False, 'used':False})
+		# sheet_tab_n = mongo_db.mongo_connect('amazon', 'select_url')
+		url_list = []
+		for s in res:
+			if not count_used(res):
+				return res
+			if s['used']:
+				continue
+			vals = {
+				'parent_name':s['name'],
+				'level':s['level'] + 1,
+			}
+			url = s['url']
+			try:
+				r = requests.get(url, headers=headers)
+				soup = BeautifulSoup(r.text, 'lxml')
+			except:
+				print "#####get page error"
+				continue
+			s['used'] = True
+			# sheet_tab.update({'url':url}, {'$set':{'used':True}})
+			for sel in selector:
+				node = soup.select(sel)
+				if node:
+					for n in node:
+						url_c = str(n['href']).strip()
+						# 去掉url中的/162-3723623-3232876?
+						if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
+							continue
+						else:
+							url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
+						# continue
+						vals['url'] = base + url_c
+						vals['count'] = 0
+						vals['name'] = 'my_name'
+						span = n.find_all('span')
+						# 判断soup有无span标签。若无，则说明不是子菜单
+						if not span:
+							continue
+						# 是否是最底层的菜单
+						if s['url'] == vals['url']:
+							vals['soup'] = False
+							vals['final_node'] = True
+							vals['used'] = True
+							print "####################This is ths final node...#####################################"
+						else:
+							vals['soup'] = True
+							vals['final_node'] = False
+							vals['used'] = False
+						if vals['url'] not in [k['url'] for k in res]:
+							res.append(vals)
+							print "####parent_name:", vals['parent_name']
+							print vals['level'], vals['url']
+							print '####span:', len(span), span
+							print '+++++++++++++++++++this is useful+++++++++++++++++++++'
+						else:
+							print "####this page is exist..."
+					break
+				else:
+					pass
 
-		if not node:
-			print '#######this is the final node'
-	# sheet_tab.insert(url_list)
-	level = level + 1
+			if not node:
+				print "#######this node can't delivery########"
+		# sheet_tab.insert(url_list)
+		level = level + 1
+
+
+r = get_final_node()
+n = 0
+for i in r:
+	if i['final_node']:
+		print i
+		print '##{}##'.format(n) * 40
+		n = n + 1
