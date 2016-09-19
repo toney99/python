@@ -228,7 +228,12 @@ def get_final_node():
 			for sel in selector:
 				node = soup.select(sel)
 				if node:
+					flag = False
 					for n in node:
+						if n.find('strong'):
+							flag = True
+						if not flag:
+							continue
 						url_c = str(n['href']).strip()
 						# 去掉url中的/162-3723623-3232876?
 						if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
