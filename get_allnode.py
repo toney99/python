@@ -195,7 +195,7 @@ def get_final_node():
 	res = [{
 			'parent_name':'parent_name',
 			'name':'name',
-			'url':'https://www.amazon.com/Home-Audio-Electronics/b/ref=sd_allcat_hat?ie=UTF8&node=667846011',
+			'url':'https://www.amazon.com/Camera-Photo-Film-Canon-Sony/b/ref=sd_allcat_p?ie=UTF8&node=502394',
 			'final_node':False,
 			'level':1,
 			'count':0,
@@ -254,12 +254,12 @@ def get_final_node():
 							vals['used'] = False
 						if vals['url'] not in [k['url'] for k in res]:
 							res.append(vals)
-							print "####parent_name:", vals['parent_name']
+							print "####parent_name:", vals['parent_name'], len(res)
 							print vals['level'], vals['url']
 							print '####span:', len(span), span
 							print '+++++++++++++++++++this is useful+++++++++++++++++++++'
 						else:
-							print "####this page is exist..."
+							print "####this page is exist...", vals['url']
 					break
 				else:
 					pass
@@ -268,6 +268,7 @@ def get_final_node():
 				print "#######this node can't delivery########"
 		# sheet_tab.insert(url_list)
 		level = level + 1
+		time.sleep(3)
 
 
 r = get_final_node()
