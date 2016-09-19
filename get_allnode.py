@@ -230,7 +230,7 @@ def get_final_node():
 				if node:
 					flag = False
 					for n in node:
-						if n.find('strong'):
+						if not n:
 							flag = True
 						if not flag:
 							continue
@@ -278,8 +278,8 @@ def get_final_node():
 			if not node:
 				print "#######this node can't delivery########"
 		# return res
-			time.sleep(5)
-		time.sleep(30)
+		# 	time.sleep(5)
+		time.sleep(20)
 
 
 r = get_final_node()
