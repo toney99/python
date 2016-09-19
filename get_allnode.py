@@ -227,13 +227,17 @@ def get_final_node():
 			# sheet_tab.update({'url':url}, {'$set':{'used':True}})
 			for sel in selector:
 				node = soup.select(sel)
+				print sel
 				if node:
 					flag = False
 					for n in node:
+						print n
+						print '**' * 20
 						if not n:
 							flag = True
 						if not flag:
-							continue
+							pass
+						continue
 						url_c = str(n['href']).strip()
 						# 去掉url中的/162-3723623-3232876?
 						if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
@@ -269,9 +273,9 @@ def get_final_node():
 							print '+++++++++++++++++++this is useful+++++++++++++++++++++'
 						else:
 							pass
-							# print "####this page is exist...", vals['url']
+						# print "####this page is exist...", vals['url']
 					print res
-					# break
+				# break
 				else:
 					pass
 
