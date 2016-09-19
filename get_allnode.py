@@ -188,6 +188,7 @@ def count_used(res):
 			count = count + 1
 		else:
 			pass
+	print 'count', count
 	return count
 
 def get_final_node():
@@ -217,7 +218,7 @@ def get_final_node():
 			}
 			url = s['url']
 			try:
-				r = requests.get(url, headers=headers)
+				r = requests.get(url, headers=headers, timeout=5)
 				soup = BeautifulSoup(r.text, 'lxml')
 			except:
 				print "#####get page error"
@@ -240,8 +241,8 @@ def get_final_node():
 						vals['name'] = 'my_name'
 						span = n.find_all('span')
 						# 判断soup有无span标签。若无，则说明不是子菜单
-						if not span:
-							continue
+						# if not span:
+						# 	continue
 						# 是否是最底层的菜单
 						if s['url'] == vals['url']:
 							vals['soup'] = False
@@ -252,30 +253,34 @@ def get_final_node():
 							vals['soup'] = True
 							vals['final_node'] = False
 							vals['used'] = False
+						v = [k['url'] for k in res]
+						# print len(node), v, res
+						# print 'node:', base + n['href']
+						# print 'vals:', vals['url']
 						if vals['url'] not in [k['url'] for k in res]:
 							res.append(vals)
-							print "####parent_name:", vals['parent_name'], len(res)
+							print len(res), 's_url:', s['url']
 							print vals['level'], vals['url']
-							print '####span:', len(span), span
 							print '+++++++++++++++++++this is useful+++++++++++++++++++++'
 						else:
-							print "####this page is exist...", vals['url']
-					break
+							pass
+							# print "####this page is exist...", vals['url']
+					print res
+					# break
 				else:
 					pass
 
 			if not node:
 				print "#######this node can't delivery########"
-		# sheet_tab.insert(url_list)
-		level = level + 1
-		break
-		time.sleep(3)
+		# return res
+			time.sleep(5)
+		time.sleep(30)
 
 
 r = get_final_node()
 n = 0
-for i in r:
-	if i['final_node']:
-		print i
-		print '##{}##'.format(n) * 40
-		n = n + 1
+# for i in r:
+# 	if i['final_node']:
+# 		print i
+# 		print '##{}##'.format(n) * 40
+# 		n = n + 1
