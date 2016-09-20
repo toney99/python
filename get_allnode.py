@@ -191,31 +191,31 @@ def count_used(res):
 	print 'count', count
 	return count
 
-def get_final_node():
+res = [{
+	'parent_name':'parent_name',
+	'name':'name',
+	'url':'https://www.amazon.com/Camera-Photo-Film-Canon-Sony/b/ref=sd_allcat_p?ie=UTF8&node=502394',
+	'final_node':False,
+	'level':1,
+	'count':0,
+	'used':False,
+}]
+def get_final_node(res):
 	level = 1
-	res = [{
-			'parent_name':'parent_name',
-			'name':'name',
-			'url':'https://www.amazon.com/Camera-Photo-Film-Canon-Sony/b/ref=sd_allcat_p?ie=UTF8&node=502394',
-			'final_node':False,
-			'level':1,
-			'count':0,
-			'used':False,
-		}]
-	while True:
+	for i in range(1, 100):
 		# sheet_tab = mongo_db.mongo_connect('amazon', 'select_url')
 		# res = sheet_tab.find({'level':level, 'soup':True, 'final_node':False, 'used':False})
 		# sheet_tab_n = mongo_db.mongo_connect('amazon', 'select_url')
 		url_list = []
+		# s = None
 		for s in res:
 			if not count_used(res):
 				return res
 			if s['used']:
 				continue
-			vals = {
-				'parent_name':s['name'],
-				'level':s['level'] + 1,
-			}
+			vals = {}
+			vals['parent_name'] = s['name']
+			vals['level'] = s['level'] + 1
 			url = s['url']
 			try:
 				r = requests.get(url, headers=headers, timeout=5)
@@ -231,16 +231,23 @@ def get_final_node():
 				if node:
 					flag = False
 					for n in node:
-						print n
-						print '**' * 20
-						if not n:
-							flag = True
-						if not flag:
-							pass
-						continue
+						# print n, type(n)
+						span = n.find_all('span')
+						first_span = span and span[0]['class']
+						if len(first_span) > 1:
+							print "#####span not right:", base + str(n['href']).strip()
+							continue
+						# print 'find', span and span[0]['class']
+						# print '*' * 20
+						# if not n:
+						# 	flag = True
+						# if not flag:
+						# 	pass
+						# continue
 						url_c = str(n['href']).strip()
 						# 去掉url中的/162-3723623-3232876?
 						if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
+							print '###error url:', base + url_c
 							continue
 						else:
 							url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
@@ -263,9 +270,10 @@ def get_final_node():
 							vals['final_node'] = False
 							vals['used'] = False
 						v = [k['url'] for k in res]
-						# print len(node), v, res
+						print "len(node)", v
 						# print 'node:', base + n['href']
-						# print 'vals:', vals['url']
+						print 'vals:', vals['url']
+						print '****' * 40
 						if vals['url'] not in [k['url'] for k in res]:
 							res.append(vals)
 							print len(res), 's_url:', s['url']
@@ -274,22 +282,26 @@ def get_final_node():
 						else:
 							pass
 						# print "####this page is exist...", vals['url']
-					print res
+					# print res
 				# break
 				else:
 					pass
-
 			if not node:
 				print "#######this node can't delivery########"
+			s = None
 		# return res
 		# 	time.sleep(5)
 		time.sleep(20)
 
 
-r = get_final_node()
+r = get_final_node(res)
 n = 0
-# for i in r:
-# 	if i['final_node']:
-# 		print i
-# 		print '##{}##'.format(n) * 40
-# 		n = n + 1
+print '####' * 40
+print '####' * 40
+print '####' * 40
+print len(r)
+for i in r:
+	if i['final_node']:
+		print i
+		print '##{}##'.format(n) * 40
+		n = n + 1
