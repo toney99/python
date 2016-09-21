@@ -200,22 +200,72 @@ res = [{
 	'count':0,
 	'used':False,
 }]
+
+def loop_look_node(s, node):
+	url_list = []
+	if not node:
+		print "####################This is ths final node...#####################################"
+		print s['url']
+	flag = 0
+	for n in node:
+		_vals = {}
+		_vals['parent_name'] = s['name']
+		_vals['level'] = s['level'] + 1
+		# 通过第一个span的
+		span = n.find_all('span')
+		first_span = span and span[0]['class']
+		if len(first_span) > 1:
+			print "#####span not right:", base + str(n['href']).strip()
+			continue
+		flag = flag + 1
+		url_c = str(n['href']).strip()
+		# 去掉url中的/162-3723623-3232876?
+		if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
+			print '###error url:', base + url_c
+			continue
+		else:
+			url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
+		# continue
+		_vals['url'] = base + url_c
+		_vals['count'] = 0
+		_vals['name'] = 'my_name'
+		# span = n.find_all('span')
+		# 判断soup有无span标签。若无，则说明不是子菜单
+		# if not span:
+		# 	continue
+		# 是否是最底层的菜单
+		if s['url'] == _vals['url']:
+			_vals['soup'] = False
+			_vals['final_node'] = True
+			_vals['used'] = True
+			print "####################This is ths final node...#####################################"
+		else:
+			_vals['soup'] = True
+			_vals['final_node'] = False
+			_vals['used'] = False
+		v = [k.get('url', False) for k in url_list]
+		# print "len(node)", v
+		# print 'node:', base + n['href']
+		# print 'vals:', _vals['url']
+		# print '****' * 40
+		if _vals['url'] not in v:
+			url_list.append(_vals)
+			print '++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+			print len(res), 's_url:', s['url']
+			print _vals['level'], _vals['url']
+			print '+++++++++++++++++++this is useful+++++++++++++++++++++'
+		else:
+			pass
+	return url_list, flag
+
 def get_final_node(res):
 	level = 1
 	for i in range(1, 100):
-		# sheet_tab = mongo_db.mongo_connect('amazon', 'select_url')
-		# res = sheet_tab.find({'level':level, 'soup':True, 'final_node':False, 'used':False})
-		# sheet_tab_n = mongo_db.mongo_connect('amazon', 'select_url')
-		url_list = []
-		# s = None
 		for s in res:
 			if not count_used(res):
 				return res
 			if s['used']:
 				continue
-			_vals = {}
-			_vals['parent_name'] = s['name']
-			_vals['level'] = s['level'] + 1
 			url = s['url']
 			try:
 				r = requests.get(url, headers=headers, timeout=5)
@@ -224,71 +274,24 @@ def get_final_node(res):
 				print "#####get page error"
 				continue
 			s['used'] = True
-			# sheet_tab.update({'url':url}, {'$set':{'used':True}})
 			for sel in selector:
 				node = soup.select(sel)
 				print sel
 				if node:
-					flag = False
-					for n in node:
-						# print n, type(n)
-						span = n.find_all('span')
-						first_span = span and span[0]['class']
-						if len(first_span) > 1:
-							print "#####span not right:", base + str(n['href']).strip()
-							continue
-						url_c = str(n['href']).strip()
-						# 去掉url中的/162-3723623-3232876?
-						if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
-							print '###error url:', base + url_c
-							continue
-						else:
-							url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
-						# continue
-						_vals['url'] = base + url_c
-						_vals['count'] = 0
-						_vals['name'] = 'my_name'
-						# span = n.find_all('span')
-						# 判断soup有无span标签。若无，则说明不是子菜单
-						# if not span:
-						# 	continue
-						# 是否是最底层的菜单
-						if s['url'] == _vals['url']:
-							_vals['soup'] = False
-							_vals['final_node'] = True
-							_vals['used'] = True
-							print "####################This is ths final node...#####################################"
-						else:
-							_vals['soup'] = True
-							_vals['final_node'] = False
-							_vals['used'] = False
-						v = [k['url'] for k in res]
-						print "len(node)", v
-						# print 'node:', base + n['href']
-						print 'vals:', _vals['url']
-						print '****' * 40
-						if _vals['url'] not in [k['url'] for k in res]:
-							url_list.append(_vals)
-							print len(res), 's_url:', s['url']
-							print _vals['level'], _vals['url']
-							print '+++++++++++++++++++this is useful+++++++++++++++++++++'
-						else:
-							pass
-						# print "####this page is exist...", vals['url']
-					# print res
-				# break
+					url_list, flag = loop_look_node(s, node)
+					if not flag:
+						print "####################This is ths final node...#####################################"
+						print s['url']
 				else:
 					pass
 			if not node:
 				print "#######this node can't delivery########"
 			res = res + url_list
-			for i in res:
-				print i['url']
-			print '####' * 40
-			time.sleep(30)
-		# return res
-		# 	time.sleep(5)
-		time.sleep(20)
+			print "len(res)", len(res)
+			# for i in res:
+			# 	print i['level'], i['url']
+			# print '####' * 40
+			time.sleep(10)
 
 
 r = get_final_node(res)
@@ -298,9 +301,9 @@ print '####' * 40
 print '####' * 40
 print len(r)
 for i in r:
-	print i['url']
-	# if i['final_node']:
-	# 	print i
-	# 	print '##{}##'.format(n) * 40
-	# 	n = n + 1
+	# print i['url']
+	if i['final_node']:
+		print n, i
+		# print '##{}##'.format(n) * 40
+		n = n + 1
 
