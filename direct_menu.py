@@ -30,7 +30,7 @@ def save_directory_url(url):
 		parent_name =  i.find('h3').text
 		url_list = i.select('div.fsdDeptCol > a')
 		for u in url_list:
-			# print u['href'], u.text
+			print u['href'], u.text
 			vals = {}
 			child_url = str(u['href']).strip()
 			if child_url[:1] == '/':
@@ -44,7 +44,7 @@ def save_directory_url(url):
 	return all_urls
 
 	
-save_directory_url(url)
+# save_directory_url(url)
 # 
 # all_urls = save_directory_url(url)
 
