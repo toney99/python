@@ -7,6 +7,8 @@ from random import random,randint
 import get_two_menu, direct_menu
 import mongo_db
 import time
+import logging, os
+import Logger
 
 url = "https://www.amazon.com/gp/site-directory/"
 # ch_url = "https://www.amazon.com/home-automation-smarthome/b/ref=sd_allcat_homaut?ie=UTF8&node=6563140011"
@@ -39,6 +41,8 @@ parent_name_list = [
 	'Handmade',
 ]
 
+put_log = Logger.Logger('/var/amazon/amazon_log.log',logging.ERROR,logging.DEBUG)
+
 # 读取https://www.amazon.com/gp/site-directory/中的所有的二级菜单的地址
 # 根据二级菜单的地址获取该菜单下所有子节点的url地址
 # 每个二级菜单下的子菜单位于不同的位置，需要按每个菜单的特点进行解析
@@ -68,6 +72,7 @@ def save_allnode(ch_url, name, parent_name):
 				vals['soup'] = True   # soup = True表示该url能通过解析器解析
 				sheet_tab.insert(vals)
 				print 'ch_url', ch_url, vals['soup']
+				# put_log('save_allnode #' + ch_url + vals['soup'])
 			return True
 		else:
 			pass
@@ -76,6 +81,7 @@ def save_allnode(ch_url, name, parent_name):
 		if not sheet_tab.find({'url':ch_url}).count():
 			sheet_tab.insert(vals)
 			print 'ch_url', ch_url, vals['soup']
+			# put_log('save_allnode #' + ch_url + vals['soup'])
 	return True
 
 # 获取direct菜单下指定一级菜单的二级菜单，默认为所有direct菜单的所有二级菜单
@@ -89,6 +95,8 @@ def check_direct_name(name=''):
 	print '####' * 40
 	print 'main_url_url len(res)', res.count()
 	print '####' * 40
+	# put_log('check_direct_name #res.count():' + res.count())
+
 	for r in res:
 		# 替换url中的这串随机数
 		# s_num = str(randint(100, 999)) + '-' + str(randint(1000000, 9999999)) + '-' + str(randint(1000000, 9999999))
@@ -126,6 +134,7 @@ def count_used(res):
 		else:
 			pass
 	print 'not use count:', count
+	# put_log('count_used #count:' + str(count))
 	return count
 
 # res = [{
@@ -162,6 +171,7 @@ def loop_look_node(s, node):
 		# 去掉url中的/162-3723623-3232876?
 		if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
 			print '###error url:', base + url_c
+			# put_log('loop_look_node #error url:' + base + url_c)
 			continue
 		else:
 			url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
@@ -176,6 +186,7 @@ def loop_look_node(s, node):
 			url_list.append(_vals)
 			# print '++++++++++++++++++++++++++++++++++++++++++++++++++++++'
 			print _vals['level'], _vals['url']
+			# put_log('check_direct_name # useful url :' + _vals['level'] + _vals['url'])
 			print '+++++++++++++++++++this is useful+++++++++++++++++++++'
 		else:
 			pass
@@ -197,6 +208,7 @@ def get_final_node(res):
 				soup = BeautifulSoup(r.text, 'lxml')
 			except:
 				print "##################get page error",url
+				# put_log('get_final_node # request page error:' + url)
 				continue
 			s['used'] = True
 			for sel in selector:
@@ -209,12 +221,14 @@ def get_final_node(res):
 						print "####################This is ths final node...#####################################"
 						s['final_node'] = True
 						print s['url']
+						# put_log('get_final_node # final node:' + s['url'])
 				else:
 					pass
 			if not node:
 				print "#######this node can't delivery########",url
 			print 'parent name:', s['parent_name'], s['name']
-			print "page total:", len(page)
+			print "page total:", len(pages)
+			# put_log('get_fina_node # parent_name, name: ' + s['parent_name'] + ' ' + s['name'])
 		res = res + url_list
 		# time.sleep(5)
 
@@ -229,6 +243,7 @@ def save_final_node():
 		res = get_final_node([s])
 		print "####" * 40
 		print "{} 大类final节点 {}".format(s['parent_name'], len(res))
+		# put_log('save_final_node # final node:' + s['parent_name'] + ' ' + s['name'] + len(res))
 		print "####" * 40
 		for r in res:
 			if r['final_node'] and not sheet_final.find({'url':r['url']}).count():
