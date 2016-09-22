@@ -65,7 +65,7 @@ def save_allnode(ch_url, name, parent_name):
 		node = soup.select(s)
 		if not sheet_tab.find({'url':ch_url}).count():
 			if node:
-				vals['soup'] = True
+				vals['soup'] = True   # soup = True表示该url能通过解析器解析
 				sheet_tab.insert(vals)
 			else:
 				vals['soup'] = False
@@ -108,7 +108,7 @@ if not sheet_tab.find().count():
 	for name in parent_name_list:
 		check_direct_name(name)
 	
-
+# 统计没有解析的url的数量
 def count_used(res):
 	count = 0
 	for r in res:
@@ -116,34 +116,37 @@ def count_used(res):
 			count = count + 1
 		else:
 			pass
-	print 'count', count
+	print 'not use count:', count
 	return count
 
-res = [{
-	'parent_name':'parent_name',
-	'name':'name',
-	'url':'https://www.amazon.com/Camera-Photo-Film-Canon-Sony/b/ref=sd_allcat_p?ie=UTF8&node=502394',
-	'final_node':False,
-	'level':1,
-	'count':0,
-	'used':False,
-}]
+# res = [{
+# 	'parent_name':'parent_name',
+# 	'name':'name',
+# 	'url':'https://www.amazon.com/Camera-Photo-Film-Canon-Sony/b/ref=sd_allcat_p?ie=UTF8&node=502394',
+# 	'final_node':False,
+# 	'level':1,
+# 	'count':0,
+# 	'used':False,
+# }]
 
+# 取出单个节点下的所有子菜单
 def loop_look_node(s, node):
 	url_list = []
-	if not node:
-		print "####################This is ths final node...#####################################"
-		print s['url']
+	# if not node:
+	# 	print "####################This is ths final node...#####################################"
+	# 	print s['url']
 	flag = 0
 	for n in node:
 		_vals = {}
 		_vals['parent_name'] = s['name']
 		_vals['level'] = s['level'] + 1
-		# 通过第一个span的
+		# 通过a标签中第一个span的class的属性数量来判断是否是子菜单
+		# 上级菜单的span中包含srSprite backArrow
+		# 子菜单中的span中包含refinementLink
 		span = n.find_all('span')
-		first_span = span and span[0]['class']
+		first_span = span and span[0]['class'] or []
 		if len(first_span) > 1:
-			print "#####span not right:", base + str(n['href']).strip()
+			print "#####span not children:", base + str(n['href']).strip()
 			continue
 		flag = flag + 1
 		url_c = str(n['href']).strip()
@@ -153,33 +156,16 @@ def loop_look_node(s, node):
 			continue
 		else:
 			url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
-		# continue
 		_vals['url'] = base + url_c
 		_vals['count'] = 0
 		_vals['name'] = 'my_name'
-		# span = n.find_all('span')
-		# 判断soup有无span标签。若无，则说明不是子菜单
-		# if not span:
-		# 	continue
-		# 是否是最底层的菜单
-		if s['url'] == _vals['url']:
-			_vals['soup'] = False
-			_vals['final_node'] = True
-			_vals['used'] = True
-			print "####################This is ths final node...#####################################"
-		else:
-			_vals['soup'] = True
-			_vals['final_node'] = False
-			_vals['used'] = False
+		_vals['soup'] = True
+		_vals['final_node'] = False
+		_vals['used'] = False
 		v = [k.get('url', False) for k in url_list]
-		# print "len(node)", v
-		# print 'node:', base + n['href']
-		# print 'vals:', _vals['url']
-		# print '****' * 40
 		if _vals['url'] not in v:
 			url_list.append(_vals)
-			print '++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-			print len(res), 's_url:', s['url']
+			# print '++++++++++++++++++++++++++++++++++++++++++++++++++++++'
 			print _vals['level'], _vals['url']
 			print '+++++++++++++++++++this is useful+++++++++++++++++++++'
 		else:
@@ -200,7 +186,7 @@ def get_final_node(res):
 				r = requests.get(url, headers=headers, timeout=5)
 				soup = BeautifulSoup(r.text, 'lxml')
 			except:
-				print "#####get page error"
+				print "##################get page error",url
 				continue
 			s['used'] = True
 			for sel in selector:
@@ -209,34 +195,45 @@ def get_final_node(res):
 				if node:
 					url_list, flag = loop_look_node(s, node)
 					if not flag:
-						s['final_node'] = True
 						print "####################This is ths final node...#####################################"
+						s['final_node'] = True
 						print s['url']
 				else:
 					pass
 			if not node:
-				print "#######this node can't delivery########"
+				print "#######this node can't delivery########",url
 			res = res + url_list
-			print "len(res)", len(res)
-			# for i in res:
-			# 	print i['level'], i['url']
-			# print '####' * 40
-			time.sleep(10)
+			print "res total:", len(res)
+			# time.sleep(5)
 
+	return True
 
-for name in parent_name_list:
-	check_direct_name(name)
+# 保存子节点
+def save_final_node():
+	sheet_tab = mongo_db.mongo_connect('amazon', 'select_url')
+	sheet_final = mongo_db.mongo_connect('amazon', 'final_url')
+	for s in sheet_tab.find({'soup':True}):
+		# print s
+		res = get_final_node([s])
+		print "####" * 40
+		print "{} 大类final节点 {}".format(s['parent_name'], len(res))
+		print "####" * 40
+		for r in res:
+			if r['final_node'] and not sheet_final.find({'url':r['url']}).count():
+				sheet_final.insert(r)
+			else:
+				pass
+	return True
 
-r = get_final_node(res)
-n = 0
-print '####' * 40
-print '####' * 40
-print '####' * 40
-print len(r)
-for i in r:
-	# print i['url']
-	if i['final_node']:
-		print n, i
-		# print '##{}##'.format(n) * 40
-		n = n + 1
+save_final_node()
+# r = get_final_node(res)
+# n = 0
+# print '####' * 40
+# print '####' * 40
+# print '####' * 40
+# print len(r)
+# for i in r:
+# 	if i['final_node']:
+# 		print n, i
+# 		n = n + 1
 

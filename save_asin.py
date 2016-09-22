@@ -11,8 +11,9 @@ def save_asin(asin):
 # save_asin('B00IWHDAKA')
 url = "https://www.amazon.com/KETCL-OT2301-CHR-Buckshot-Waterproof-Super-Portable/dp/B01HC2FZLM/ref=sr_1_72/162-7486134-3314738?s=home-automation&srs=6563140011&ie=UTF8&qid=1473496109&sr=1-72"
 def save_asin_by_url(url):
-	if url.split('/') > 5:
-		asin = url.split('/')[5]
+	s = url.split('/')
+	if len(s) > 5:
+		asin = s[5]
 		save_asin(asin)
 	else:
 		print '######save asin error######', url
