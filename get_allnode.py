@@ -63,13 +63,19 @@ def save_allnode(ch_url, name, parent_name):
 	# 通过一组页面结构来解析获取子菜单url
 	for s in selector:
 		node = soup.select(s)
-		if not sheet_tab.find({'url':ch_url}).count():
-			if node:
+		if node:
+			if not sheet_tab.find({'url':ch_url}).count():
 				vals['soup'] = True   # soup = True表示该url能通过解析器解析
 				sheet_tab.insert(vals)
-			else:
-				vals['soup'] = False
-				sheet_tab.insert(vals)
+				print 'ch_url', ch_url, vals['soup']
+			return True
+		else:
+			pass
+	if not node:
+		vals['soup'] = False
+		if not sheet_tab.find({'url':ch_url}).count():
+			sheet_tab.insert(vals)
+			print 'ch_url', ch_url, vals['soup']
 	return True
 
 # 获取direct菜单下指定一级菜单的二级菜单，默认为所有direct菜单的所有二级菜单
@@ -80,6 +86,9 @@ def check_direct_name(name=''):
 		res = sheet_tab.find({'parent_name':name})
 	else:
 		res = sheet_tab.find()
+	print '####' * 40
+	print 'main_url_url len(res)', res.count()
+	print '####' * 40
 	for r in res:
 		# 替换url中的这串随机数
 		# s_num = str(randint(100, 999)) + '-' + str(randint(1000000, 9999999)) + '-' + str(randint(1000000, 9999999))
@@ -176,6 +185,7 @@ def get_final_node(res):
 	level = 1
 	# for i in range(1, 100):
 	while True:
+		pages = []
 		for s in res:
 			if not count_used(res):
 				return res
@@ -194,6 +204,7 @@ def get_final_node(res):
 				print sel
 				if node:
 					url_list, flag = loop_look_node(s, node)
+					pages = pages + url_list
 					if not flag:
 						print "####################This is ths final node...#####################################"
 						s['final_node'] = True
@@ -202,9 +213,10 @@ def get_final_node(res):
 					pass
 			if not node:
 				print "#######this node can't delivery########",url
-			res = res + url_list
-			print "res total:", len(res)
-			# time.sleep(5)
+			print 'parent name:', s['parent_name'], s['name']
+			print "page total:", len(page)
+		res = res + url_list
+		# time.sleep(5)
 
 	return True
 
