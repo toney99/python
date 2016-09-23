@@ -172,7 +172,7 @@ def loop_look_node(s, node):
 		# 去掉url中的/162-3723623-3232876?,检查是否含有这串数字
 		if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
 			print '### url not contain num:', base + url_c
-			logger.info('loop_look_node # not contain num:' + base + url_c)
+			logger.info('@@@loop_look_node # not contain num:' + base + url_c)
 			# continue
 		else:
 			url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
@@ -211,7 +211,7 @@ def get_final_node(res):
 				soup = BeautifulSoup(r.text, 'lxml')
 			except:
 				print "##################get page error",url
-				logger.debug('@get_final_node # request page error:' + url)
+				logger.debug('@@@get_final_node # request page error:' + url)
 				continue
 			s['used'] = True
 			for sel in selector:
@@ -235,7 +235,7 @@ def get_final_node(res):
 			print 'name:', s['name']
 			print "name pages total:", len(pages)
 			logger.info('****get_fina_node**** # parent_name: {} name {}'.format(s['parent_name'], s['name']))
-			logger.info('****get_fina_node**** # name pages total:'.format(len(pages)))
+			logger.info('****get_fina_node**** # name pages total:{}'.format(len(pages)))
 		res = res + pages
 		# time.sleep(5)
 
