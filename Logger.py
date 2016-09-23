@@ -33,13 +33,15 @@ class Logger:
 	def cri(self,message):
 		self.logger.critical(message)
 
-# put_log = Logger('/var/amazon/amazon_log.log',logging.ERROR,logging.DEBUG)
+def logger():
+	logger = Logger('/var/amazon/amazon_log.log',logging.ERROR,logging.DEBUG)
+	return logger
 
 # if __name__ =='__main__':
-# 	put_log = Logger('/var/amazon/amazon_log.log',logging.ERROR,logging.DEBUG)
-# 	put_log.debug('一个debug信息')
-# 	put_log.info('一个info信息')
-# 	put_log.war('一个warning信息')
-# 	put_log.error('一个error信息')
-# 	put_log.cri('一个致命critical信息')
+# 	logger = Logger('/var/amazon/amazon_log.log',logging.ERROR,logging.DEBUG)
+# 	logger.debug('一个debug信息')
+# 	logger.info('一个info信息')
+# 	logger.war('一个warning信息')
+# 	logger.error('一个error信息')
+# 	logger.cri('一个致命critical信息')
 
