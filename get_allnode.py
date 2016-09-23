@@ -235,6 +235,7 @@ def get_final_node(res):
 			print 'name:', s['name']
 			print "name pages total:", len(pages)
 			logger.info('****get_fina_node**** # parent_name: {} name {}'.format(s['parent_name'], s['name']))
+			logger.info('****get_fina_node**** # name pages total:'.format(len(pages)))
 		res = res + pages
 		# time.sleep(5)
 
