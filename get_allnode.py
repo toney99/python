@@ -126,14 +126,14 @@ if not sheet_tab.find().count():
 		check_direct_name(name)
 	
 # 统计没有解析的url的数量
-def count_used(res):
+def check_used(res):
 	count = 0
 	for r in res:
 		if not r['used']:
 			count = count + 1
 		else:
 			pass
-	print 'not use count:', count
+	# print 'not use count:', count
 	logger.debug('count_used # count:' + str(count))
 	return count
 
@@ -150,9 +150,6 @@ def count_used(res):
 # 取出单个节点下的所有子菜单
 def loop_look_node(s, node):
 	url_list = []
-	# if not node:
-	# 	print "####################This is ths final node...#####################################"
-	# 	print s['url']
 	flag = 0
 	for n in node:
 		_vals = {}
@@ -161,20 +158,22 @@ def loop_look_node(s, node):
 		# 通过a标签中第一个span的class的属性数量来判断是否是子菜单
 		# 上级菜单的span中包含srSprite backArrow
 		# 子菜单中的span中包含refinementLink
+		# print n
+		if not n.find('span'):
+			continue
+		name = str(n.find('span').text).encode('utf-8')
+		print '###name', name, type(name)
 		span = n.find_all('span')
 		first_span = span and span[0]['class'] or []
-		name = span and span[0].text or 'not found'
 		if len(first_span) > 1:
-			print "#####span not children:", base + str(n['href']).strip()
-			print "name", name
 			continue
 		flag = flag + 1
 		url_c = str(n['href']).strip()
-		# 去掉url中的/162-3723623-3232876?
+		# 去掉url中的/162-3723623-3232876?,检查是否含有这串数字
 		if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
-			print '###error url:', base + url_c
-			logger.info('loop_look_node # error url:' + base + url_c)
-			continue
+			print '### url not contain num:', base + url_c
+			logger.info('loop_look_node # not contain num:' + base + url_c)
+			# continue
 		else:
 			url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
 		_vals['url'] = base + url_c
@@ -187,9 +186,9 @@ def loop_look_node(s, node):
 		if _vals['url'] not in v:
 			url_list.append(_vals)
 			# print '++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-			print _vals['level'], _vals['url']
+			# print _vals['level'], _vals['url']
 			logger.info('check_direct_name # useful url :' + str(_vals['level']) + _vals['url'])
-			print '+++++++++++++++++++this is useful+++++++++++++++++++++'
+			# print '+++++++++++++++++++this is useful+++++++++++++++++++++'
 		else:
 			pass
 	return url_list, flag
@@ -200,17 +199,19 @@ def get_final_node(res):
 	while True:
 		pages = []
 		for s in res:
-			if not count_used(res):
-				return res
+			count = check_used(res)
+			if not count:
+				continue
 			if s['used']:
 				continue
+			print 'count:', count
 			url = s['url']
 			try:
-				r = requests.get(url, headers=headers, timeout=5)
+				r = requests.get(url, headers=headers)
 				soup = BeautifulSoup(r.text, 'lxml')
 			except:
 				print "##################get page error",url
-				logger.debug('get_final_node # request page error:' + url)
+				logger.debug('@get_final_node # request page error:' + url)
 				continue
 			s['used'] = True
 			for sel in selector:
@@ -220,19 +221,21 @@ def get_final_node(res):
 					url_list, flag = loop_look_node(s, node)
 					pages = pages + url_list
 					if not flag:
-						print "####################This is ths final node...#####################################"
+						# print "####################This is ths final node...#####################################"
 						s['final_node'] = True
-						print s['url']
-						logger.info('get_final_node # final node:' + s['url'])
+						# print s['url']
+						logger.info('****get_final_node**** final node:{}'.format(s['url']))
+					break
 				else:
-					url_list = []
 					pass
 			if not node:
+				pass
 				print "#######this node can't delivery########",url
-			print 'parent name:', s['parent_name'], s['name']
-			print "page total:", len(pages)
-			logger.info('get_fina_node # parent_name, name: ' + s['parent_name'] + ' ' + s['name'])
-		res = res + url_list
+			print 'parent name:', s['parent_name']
+			print 'name:', s['name']
+			print "name pages total:", len(pages)
+			logger.info('****get_fina_node**** # parent_name: {} name {}'.format(s['parent_name'], s['name']))
+		res = res + pages
 		# time.sleep(5)
 
 	return True
@@ -242,10 +245,11 @@ def save_final_node():
 	sheet_tab = mongo_db.mongo_connect('amazon', 'select_url')
 	sheet_final = mongo_db.mongo_connect('amazon', 'final_url')
 	for s in sheet_tab.find({'soup':True}):
+		print s
 		res = get_final_node([s])
 		print "####" * 40
 		print "{} 大类 {} final节点 {}".format(s['parent_name'], s['name'], len(res))
-		logger.info('save_final_node # final node:' + s['parent_name'] + ' ' + s['name'] + str(len(res)))
+		logger.info('### save_final_node # final node:' + s['parent_name'] + ' ' + s['name'] + str(len(res)))
 		print "####" * 40
 		for r in res:
 			if r['final_node'] and not sheet_final.find({'url':r['url']}).count():
@@ -254,10 +258,10 @@ def save_final_node():
 				pass
 	return True
 
-try:
-	save_final_node()
-except Exception, e:
-	msg = '### python run error: {}'.format(e)
-	logger.debug(msg)
+# try:
+# 	save_final_node()
+# except Exception, e:
+# 	msg = '### python run error: {}'.format(e)
+	# logger.debug(msg)
 
-
+save_final_node()
