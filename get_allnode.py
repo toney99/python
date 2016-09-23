@@ -206,6 +206,7 @@ def get_final_node(res):
 				continue
 			print 'count:', count
 			logger.debug('count_used # count:' + str(count))
+			logger.debug('currnt res # count:{}'.format(len(res)))
 			url = s['url']
 			try:
 				r = requests.get(url, headers=headers)
