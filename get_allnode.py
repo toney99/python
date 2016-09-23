@@ -134,7 +134,7 @@ def check_used(res):
 		else:
 			pass
 	# print 'not use count:', count
-	logger.debug('count_used # count:' + str(count))
+	# logger.debug('count_used # count:' + str(count))
 	return count
 
 # res = [{
@@ -172,7 +172,7 @@ def loop_look_node(s, node):
 		# 去掉url中的/162-3723623-3232876?,检查是否含有这串数字
 		if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
 			print '### url not contain num:', base + url_c
-			logger.info('@@@loop_look_node # not contain num:' + base + url_c)
+			logger.info('#####loop_look_node ###### not contain num:' + base + url_c)
 			# continue
 		else:
 			url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
@@ -201,17 +201,18 @@ def get_final_node(res):
 		for s in res:
 			count = check_used(res)
 			if not count:
-				continue
+				return res
 			if s['used']:
 				continue
 			print 'count:', count
+			logger.debug('count_used # count:' + str(count))
 			url = s['url']
 			try:
 				r = requests.get(url, headers=headers)
 				soup = BeautifulSoup(r.text, 'lxml')
 			except:
 				print "##################get page error",url
-				logger.debug('@@@get_final_node # request page error:' + url)
+				logger.debug('#####get_final_node ###### request page error:' + url)
 				continue
 			s['used'] = True
 			for sel in selector:
@@ -250,7 +251,8 @@ def save_final_node():
 		res = get_final_node([s])
 		print "####" * 40
 		print "{} 大类 {} final节点 {}".format(s['parent_name'], s['name'], len(res))
-		logger.info('### save_final_node # final node:' + s['parent_name'] + ' ' + s['name'] + str(len(res)))
+		logger.info('************ save_final_node *********************')
+		logger.info('************ parent_name:{}--name:{}--count:{}'.format(s['parent_name'], s['name'], str(len(res))))
 		print "####" * 40
 		for r in res:
 			if r['final_node'] and not sheet_final.find({'url':r['url']}).count():
