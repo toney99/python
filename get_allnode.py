@@ -239,7 +239,7 @@ def get_final_node(res):
 				print "#######this node can't delivery########",url
 			parent_name = s['parent_name']
 			name = s['name']
-			parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '').replace('\’'， '')
+			parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '').replace('\’', '')
 			name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '').replace('\’', '')
 			print 'parent name:', parent_name, type(parent_name)
 			print 'name:', name, type(name)
