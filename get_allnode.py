@@ -262,12 +262,16 @@ def save_final_node():
 		res = get_final_node([s])
 		sheet_tab.update({'_id':s['_id']}, {'$set':{'used':True}})
 		print "####" * 40
-		print "{} 大类 {} final节点 {}".format(s['parent_name'], s['name'], len(res))
+		# print "{} 大类 {} final节点 {}".format(s['parent_name'], s['name'], len(res))
+		print '大类:', s['parent_name']
+		print '节点:', s['name']
+		print 'len:', len(res)
 		parent_name = s['parent_name']
 		name = s['name']
 		# parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
 		# name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
 		logger.info('************ save_final_node *********************')
+		logger.info('message len(res)' + str(len(res)))
 		# logger.info('************ parent_name:'+ str(parent_name) + '--name:' + str(name) +'--count:' + str(len(res)))
 		print "####" * 40
 		for r in res:
