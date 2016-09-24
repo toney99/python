@@ -154,7 +154,9 @@ def loop_look_node(s, node):
 	flag = 0
 	for n in node:
 		_vals = {}
-		_vals['parent_name'] = s['name'].strip()
+		parent_name = s['name']
+		parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "")
+		_vals['parent_name'] = parent_name.strip()
 		_vals['level'] = s['level'] + 1
 		# 通过a标签中第一个span的class的属性数量来判断是否是子菜单
 		# 上级菜单的span中包含srSprite backArrow
@@ -162,8 +164,9 @@ def loop_look_node(s, node):
 		# print n
 		if not n.find('span'):
 			continue
-		name = n.find('span').text.encode('utf-8')
-		print '###name:', name, type(name)
+		name = n.find('span').text
+		name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "")
+		print '###name:', name, type(name), 'parent_name:', parent_name
 		span = n.find_all('span')
 		first_span = span and span[0]['class'] or []
 		if len(first_span) > 1:
