@@ -166,7 +166,7 @@ def loop_look_node(s, node):
 			continue
 		name = n.find('span').text
 		name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'')
-		print '###name:', name, type(name), 'parent_name:', parent_name
+		print '###name:', name, type(name), 'parent_name:', parent_name, type(parent_name)
 		span = n.find_all('span')
 		first_span = span and span[0]['class'] or []
 		if len(first_span) > 1:
@@ -239,8 +239,8 @@ def get_final_node(res):
 				print "#######this node can't delivery########",url
 			parent_name = s['parent_name']
 			name = s['name']
-			parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
-			name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
+			parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '').replace('\’'， '')
+			name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '').replace('\’', '')
 			print 'parent name:', parent_name, type(parent_name)
 			print 'name:', name, type(name)
 			print "name pages total:", len(pages)
