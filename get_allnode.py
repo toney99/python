@@ -213,7 +213,7 @@ def get_final_node(res):
 			logger.debug('currnt res # count:{}'.format(len(res)))
 			url = s['url']
 			try:
-				r = requests.get(url, headers=headers)
+				r = requests.get(url, headers=headers, timeout=30)
 				soup = BeautifulSoup(r.text, 'lxml')
 			except:
 				print "##################get page error",url
