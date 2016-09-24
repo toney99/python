@@ -7,6 +7,7 @@ from random import random,randint
 import direct_menu
 import mongo_db
 import time
+import traceback
 import logging, os
 from Logger import Logger
 logger = Logger('/var/amazon/amazon_log.log',logging.ERROR,logging.DEBUG)
@@ -249,7 +250,10 @@ def save_final_node():
 	sheet_final = mongo_db.mongo_connect('amazon', 'final_url')
 	for s in sheet_tab.find({'soup':True}):
 		print s
+		if s['used']:
+			continue
 		res = get_final_node([s])
+		sheet_tab.update({'_id':s['_id']}, {'$set':{'used':True}})
 		print "####" * 40
 		print "{} 大类 {} final节点 {}".format(s['parent_name'], s['name'], len(res))
 		logger.info('************ save_final_node *********************')
@@ -262,10 +266,10 @@ def save_final_node():
 				pass
 	return True
 
-# try:
-# 	save_final_node()
-# except Exception, e:
-# 	msg = '### python run error: {}'.format(e)
-	# logger.debug(msg)
+try:
+	save_final_node()
+except Exception:
+	msg = "exception info"
+	logger.exception(msg)
 
-save_final_node()
+# save_final_node()

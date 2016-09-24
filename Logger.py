@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import logging, os
+import traceback
 import time
  
 class Logger:
@@ -32,6 +33,9 @@ class Logger:
  
 	def cri(self,message):
 		self.logger.critical(message)
+
+	def exception(self,message):
+		self.logger.exception(message)
 
 def logger():
 	logger = Logger('/var/amazon/amazon_log.log',logging.ERROR,logging.DEBUG)
