@@ -37,54 +37,57 @@ def get_product_list(url):
 	except:
 		print "#######get error:", url
 		return False
-	one_page_urls =[]
+	# one_page_urls =[]
 	product = soup.select('a.a-link-normal.s-access-detail-page.a-text-normal')
-	print "###product_list", len(product)
+	print "****page_product_list:", len(product)
 	for p in product:
 		url = p['href']     # 商品的url地址
 		title = p['title']  # 商品的title
 		# print 'one_of_list_product:',url, title
 		save_asin.save_asin_by_url(url)
-		one_page_urls.append(url)
+		# one_page_urls.append(url)
 	return True
 
 # 根据final url获取改菜单总的页数
-def get_page_num(tre_url):
+def get_page_num(final_url):
 	try:
-		r = requests.get(tre_url, headers=headers)
+		r = requests.get(final_url, headers=headers)
 		soup = BeautifulSoup(r.text, 'lxml')
 	except:
+		print '######## GET PAGE NUM ERROR:', final_url
 		return False
 	page_num = soup.select('span.pagnDisabled')  # 获取总的页数
 
 	page = []
-	if not page_num: # 如果没有总的页数，取最后一页的数
+	# 获取总的页数，如果没有总的页数，取最后一页的数
+	if not page_num: 
 		page_num = soup.select('span.pagnLink > a')
 		page_num = page_num and page_num[-1].text or 1
 	else:
 		page_num = page_num and page_num[0].text or 1
 	page = soup.select('span.pagnLink > a')
 	page_url_node = page and page[-1]['href']  # 取其中一页的url，解析其中的srs、rh、qid、ran_num的值
-	print 'page_url_node', page_url_node  
+	print '****one_page_url_node', page_url_node  
 	if not page_url_node:
 		print '######page node Not Found#####',page
 		return False
 	# page_url_node 
 	# /s/ref=lp_7242007011_pg_3/166-1338711-6776612?rh=n%3A172282%2Cn%3A%21493964%2Cn%3A502394%2Cn%3A172435%2Cn%3A7242007011&page=3&ie=UTF8&qid=1474521868
 	# /s/ref=lp_165993011_pg_3?rh=n%3A165793011%2Cn%3A%21165795011%2Cn%3A165993011&page=3&ie=UTF8&qid=1474522127&spIA=B01HV562AI,B01HKU0TBC,B01FZTWY5Y
+	# 取出url中的rh用来拼接新的地址
 	split_eq = page_url_node.split('?')
-	# srs = split_eq[2].split('&')[0]
 	rh = split_eq[-1].split('&')[0]	
+	# srs = split_eq[2].split('&')[0]
 	# qid = split_eq[-1]
 	# ran_num = split_eq[1].split('/')[1].split('?')[0]
 
-	print 'page_num', page_num
+	print '****page_all_num:', page_num
 	for num in range(1, int(page_num), 1):
 		page_url = page_base.format(int(num), rh, int(num))
 		page.append(page_url)
 		get_product_list(page_url)
-		print 'page_url_new', page_url
-		print '-=-=' * 40
+		print '----page_url_with_num:', page_url
+		print '++++' * 40
 	print '====' * 40
 	return page
 

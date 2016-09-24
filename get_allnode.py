@@ -134,39 +134,24 @@ def check_used(res):
 			count = count + 1
 		else:
 			pass
-	# print 'not use count:', count
-	# logger.debug('count_used # count:' + str(count))
 	return count
-
-# res = [{
-# 	'parent_name':'parent_name',
-# 	'name':'name',
-# 	'url':'https://www.amazon.com/Camera-Photo-Film-Canon-Sony/b/ref=sd_allcat_p?ie=UTF8&node=502394',
-# 	'final_node':False,
-# 	'level':1,
-# 	'count':0,
-# 	'used':False,
-# }]
 
 # 取出单个节点下的所有子菜单
 def loop_look_node(s, node):
 	url_list = []
 	flag = 0
 	for n in node:
-		_vals = {}
+		vals = {}
 		parent_name = s['name']
-		# parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
-		_vals['parent_name'] = parent_name.strip()
-		_vals['level'] = s['level'] + 1
+		vals['parent_name'] = parent_name.strip()
+		vals['level'] = s['level'] + 1
 		# 通过a标签中第一个span的class的属性数量来判断是否是子菜单
 		# 上级菜单的span中包含srSprite backArrow
 		# 子菜单中的span中包含refinementLink
-		# print n
 		if not n.find('span'):
 			continue
 		name = n.find('span').text
-		# name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
-		print '###name:', name, type(name), 'parent_name:', parent_name, type(parent_name)
+		print '****name:', name, type(name), 'parent_name:', parent_name, type(parent_name)
 		span = n.find_all('span')
 		first_span = span and span[0]['class'] or []
 		if len(first_span) > 1:
@@ -175,31 +160,28 @@ def loop_look_node(s, node):
 		url_c = str(n['href']).strip()
 		# 去掉url中的/162-3723623-3232876?,检查是否含有这串数字
 		if len(url_c.split('?')[0].split('/')[-1].split('-')) != 3:
-			print '### url not contain num:', base + url_c
-			logger.info('#####loop_look_node ###### not contain num:' + base + url_c)
-			# continue
+			print '############## url not contain num:', base + url_c
 		else:
 			url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
-		_vals['url'] = base + url_c
-		_vals['count'] = 0
-		_vals['name'] = name.strip()
-		_vals['soup'] = True
-		_vals['final_node'] = False
-		_vals['used'] = False
+		url_c = url_c.split('ie')[0] + 'ie=UTF8' 
+		vals['url'] = base + url_c
+		vals['count'] = 0
+		vals['name'] = name.strip()
+		vals['soup'] = True
+		vals['final_node'] = False
+		vals['used'] = False
 		v = [k.get('url', False) for k in url_list]
-		if _vals['url'] not in v:
-			url_list.append(_vals)
-			# print '++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-			# print _vals['level'], _vals['url']
-			logger.info('check_direct_name # useful url :' + str(_vals['level']) + _vals['url'])
-			# print '+++++++++++++++++++this is useful+++++++++++++++++++++'
+		if vals['url'] not in v:
+			url_list.append(vals)
+			print '++++' * 40
+			print vals['level'], vals['url']
+			# logger.info('check_direct_name # useful url :' + str(vals['level']) + vals['url'])
 		else:
 			pass
 	return url_list, flag
 
 def get_final_node(res):
 	level = 1
-	# for i in range(1, 100):
 	while True:
 		pages = []
 		for s in res:
@@ -224,30 +206,28 @@ def get_final_node(res):
 				node = soup.select(sel)
 				print sel
 				if node:
+					print '****title:', soup.select('head > title')
 					url_list, flag = loop_look_node(s, node)
 					pages = pages + url_list
+					# flag=false, 说明该url为final node
 					if not flag:
 						# print "####################This is ths final node...#####################################"
 						s['final_node'] = True
 						# print s['url']
-						logger.info('****get_final_node**** final node:{}'.format(s['url']))
+						# logger.info('****get_final_node**** final node:{}'.format(s['url']))
 					break
 				else:
 					pass
 			if not node:
 				pass
-				print "#######this node can't delivery########",url
 			parent_name = s['parent_name']
 			name = s['name']
-			# parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '').replace('\’', '')
-			# name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '').replace('\’', '')
 			print 'parent name:', parent_name, type(parent_name)
 			print 'name:', name, type(name)
 			print "name pages total:", len(pages)
 			# logger.info('****get_fina_node**** # parent_name:' + str(parent_name) +'name: ' + str(name))
-			logger.info('****get_fina_node**** # name pages total:{}'.format(len(pages)))
+			# logger.info('****get_fina_node**** # name pages total:{}'.format(len(pages)))
 		res = res + pages
-		# time.sleep(5)
 
 	return True
 
@@ -262,14 +242,11 @@ def save_final_node():
 		res = get_final_node([s])
 		sheet_tab.update({'_id':s['_id']}, {'$set':{'used':True}})
 		print "####" * 40
-		# print "{} 大类 {} final节点 {}".format(s['parent_name'], s['name'], len(res))
 		print '大类:', s['parent_name']
 		print '节点:', s['name']
 		print 'len:', len(res)
 		parent_name = s['parent_name']
 		name = s['name']
-		# parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
-		# name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
 		logger.info('************ save_final_node *********************')
 		logger.info('message len(res)' + str(len(res)))
 		# logger.info('************ parent_name:'+ str(parent_name) + '--name:' + str(name) +'--count:' + str(len(res)))
