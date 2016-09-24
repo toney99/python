@@ -162,8 +162,8 @@ def loop_look_node(s, node):
 		# print n
 		if not n.find('span'):
 			continue
-		name = str(n.find('span').text).encode('utf-8')
-		print '###name', name, type(name)
+		name = n.find('span').text.encode('utf-8')
+		print '###name:', name, type(name)
 		span = n.find_all('span')
 		first_span = span and span[0]['class'] or []
 		if len(first_span) > 1:
@@ -237,7 +237,7 @@ def get_final_node(res):
 			print 'parent name:', s['parent_name']
 			print 'name:', s['name']
 			print "name pages total:", len(pages)
-			logger.info('****get_fina_node**** # parent_name: {} name {}'.format(s['parent_name'], s['name']))
+			logger.info('****get_fina_node**** # parent_name: {} name: {}'.format(s['parent_name'], s['name']))
 			logger.info('****get_fina_node**** # name pages total:{}'.format(len(pages)))
 		res = res + pages
 		# time.sleep(5)
