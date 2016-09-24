@@ -27,7 +27,7 @@ headers = {
 # res = sheet_tab.find({'url':'https://www.amazon.com/home-automation-smarthome/b/ref=sd_allcat_homaut?ie=UTF8&node=6563140011'})
 # print res
 node = '/s/ref=lp_6563140011_nr_scat_2407755011_ln/159-1954806-9758418?srs=6563140011&rh=n%3A2407755011&ie=UTF8&qid=1473493363&scn=2407755011&h=273bcaf49054ff8b282158c9d4b8c786907bd6d9'
-page_base = "https://www.amazon.com/s/ref=sr_pg_{}/?{}&page={}&ie=UTF8"
+page_base = "https://www.amazon.com/s/ref=sr_pg_{}?rh={}&page={}&ie=UTF8"
 
 # 获取每页商品的地址、title
 def get_product_list(url):
@@ -35,7 +35,7 @@ def get_product_list(url):
 		r = requests.get(url, headers=headers)
 		soup = BeautifulSoup(r.text, 'lxml')
 	except:
-		print "#######get error:", url
+		print "#######GET_PRODUCT_LIST_ERROR:", url
 		return False
 	# one_page_urls =[]
 	product = soup.select('a.a-link-normal.s-access-detail-page.a-text-normal')
@@ -74,9 +74,10 @@ def get_page_num(final_url):
 	# page_url_node 
 	# /s/ref=lp_7242007011_pg_3/166-1338711-6776612?rh=n%3A172282%2Cn%3A%21493964%2Cn%3A502394%2Cn%3A172435%2Cn%3A7242007011&page=3&ie=UTF8&qid=1474521868
 	# /s/ref=lp_165993011_pg_3?rh=n%3A165793011%2Cn%3A%21165795011%2Cn%3A165993011&page=3&ie=UTF8&qid=1474522127&spIA=B01HV562AI,B01HKU0TBC,B01FZTWY5Y
+	# /s/ref=sr_pg_3/166-8903883-9841960?fst=as%3Aoff&rh=n%3A172282%2Cn%3A%21493964%2Cn%3A1266092011%2Cn%3A979935011&page=3&bbn=1266092011&ie=UTF8&qid=1474733289&spIA=B01F5QK562,B00GGVPKKC,B00IYETYX8
 	# 取出url中的rh用来拼接新的地址
 	split_eq = page_url_node.split('?')
-	rh = split_eq[-1].split('&')[0]	
+	rh = split_eq[-1].split('rh=')[-1].split('&')[0]	
 	# srs = split_eq[2].split('&')[0]
 	# qid = split_eq[-1]
 	# ran_num = split_eq[1].split('/')[1].split('?')[0]
@@ -94,6 +95,7 @@ def get_page_num(final_url):
 def save_page_from_final_node():
 	sheet_final = mongo_db.mongo_connect('amazon', 'final_url')
 	for s in sheet_final.find():
+		print '----s:', s
 		get_page_num(s['url'])
 
 	return True
