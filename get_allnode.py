@@ -244,7 +244,7 @@ def get_final_node(res):
 			print 'parent name:', parent_name, type(parent_name)
 			print 'name:', name, type(name)
 			print "name pages total:", len(pages)
-			logger.info('****get_fina_node**** # parent_name:' + str(parent_name) +'name: ' + str(name))
+			# logger.info('****get_fina_node**** # parent_name:' + str(parent_name) +'name: ' + str(name))
 			logger.info('****get_fina_node**** # name pages total:{}'.format(len(pages)))
 		res = res + pages
 		# time.sleep(5)
@@ -268,7 +268,7 @@ def save_final_node():
 		# parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
 		# name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
 		logger.info('************ save_final_node *********************')
-		logger.info('************ parent_name:'+ str(parent_name) + '--name:' + str(name) +'--count:' + str(len(res)))
+		# logger.info('************ parent_name:'+ str(parent_name) + '--name:' + str(name) +'--count:' + str(len(res)))
 		print "####" * 40
 		for r in res:
 			if r['final_node'] and not sheet_final.find({'url':r['url']}).count():
