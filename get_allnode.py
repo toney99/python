@@ -155,7 +155,7 @@ def loop_look_node(s, node):
 	for n in node:
 		_vals = {}
 		parent_name = s['name']
-		parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
+		# parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
 		_vals['parent_name'] = parent_name.strip()
 		_vals['level'] = s['level'] + 1
 		# 通过a标签中第一个span的class的属性数量来判断是否是子菜单
@@ -165,7 +165,7 @@ def loop_look_node(s, node):
 		if not n.find('span'):
 			continue
 		name = n.find('span').text
-		name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'')
+		# name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
 		print '###name:', name, type(name), 'parent_name:', parent_name, type(parent_name)
 		span = n.find_all('span')
 		first_span = span and span[0]['class'] or []
@@ -239,12 +239,12 @@ def get_final_node(res):
 				print "#######this node can't delivery########",url
 			parent_name = s['parent_name']
 			name = s['name']
-			parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '').replace('\’', '')
-			name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '').replace('\’', '')
+			# parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '').replace('\’', '')
+			# name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '').replace('\’', '')
 			print 'parent name:', parent_name, type(parent_name)
 			print 'name:', name, type(name)
 			print "name pages total:", len(pages)
-			logger.info('****get_fina_node**** # parent_name: {} name: {}'.format(parent_name, name))
+			logger.info('****get_fina_node**** # parent_name:' + str(parent_name) +'name: ' + str(name))
 			logger.info('****get_fina_node**** # name pages total:{}'.format(len(pages)))
 		res = res + pages
 		# time.sleep(5)
@@ -265,10 +265,10 @@ def save_final_node():
 		print "{} 大类 {} final节点 {}".format(s['parent_name'], s['name'], len(res))
 		parent_name = s['parent_name']
 		name = s['name']
-		parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
-		name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
+		# parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
+		# name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
 		logger.info('************ save_final_node *********************')
-		logger.info('************ parent_name:{}--name:{}--count:{}'.format(parent_name, name, str(len(res))))
+		logger.info('************ parent_name:'+ str(parent_name) + '--name:' + str(name) +'--count:' + str(len(res)))
 		print "####" * 40
 		for r in res:
 			if r['final_node'] and not sheet_final.find({'url':r['url']}).count():
