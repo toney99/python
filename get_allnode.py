@@ -237,13 +237,13 @@ def get_final_node(res):
 			if not node:
 				pass
 				print "#######this node can't delivery########",url
-			print 'parent name:', s['parent_name']
-			print 'name:', s['name']
-			print "name pages total:", len(pages)
 			parent_name = s['parent_name']
 			name = s['name']
 			parent_name = unicode(parent_name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
 			name = unicode(name).replace("\r", " ").replace("\n", " ").replace("\t", '').replace("\"", "").replace('\'', '')
+			print 'parent name:', parent_name, type(parent_name)
+			print 'name:', name, type(name)
+			print "name pages total:", len(pages)
 			logger.info('****get_fina_node**** # parent_name: {} name: {}'.format(parent_name, name))
 			logger.info('****get_fina_node**** # name pages total:{}'.format(len(pages)))
 		res = res + pages
