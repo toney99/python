@@ -154,7 +154,7 @@ def loop_look_node(s, node):
 	flag = 0
 	for n in node:
 		_vals = {}
-		_vals['parent_name'] = s['name']
+		_vals['parent_name'] = s['name'].strip()
 		_vals['level'] = s['level'] + 1
 		# 通过a标签中第一个span的class的属性数量来判断是否是子菜单
 		# 上级菜单的span中包含srSprite backArrow
@@ -179,7 +179,7 @@ def loop_look_node(s, node):
 			url_c = "/".join(url_c.split('/')[0:-1]) + '?' + url_c.split('?')[-1]
 		_vals['url'] = base + url_c
 		_vals['count'] = 0
-		_vals['name'] = name
+		_vals['name'] = name.strip()
 		_vals['soup'] = True
 		_vals['final_node'] = False
 		_vals['used'] = False
