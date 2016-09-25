@@ -150,12 +150,13 @@ def loop_look_node(s, node):
 		# 子菜单中的span中包含refinementLink
 		if not n.find('span'):
 			continue
-		name = n.find('span').text
-		print '****name:', name, type(name), 'parent_name:', parent_name, type(parent_name)
+		# 检查span class的数量，若长度大于1，说明是返回上层菜单的地址
 		span = n.find_all('span')
 		first_span = span and span[0]['class'] or []
 		if len(first_span) > 1:
 			continue
+		name = n.find('span').text
+		print '****name:', name, type(name), 'parent_name:', parent_name, type(parent_name)
 		flag = flag + 1
 		url_c = str(n['href']).strip()
 		# 去掉url中的/162-3723623-3232876?,检查是否含有这串数字

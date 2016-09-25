@@ -5,6 +5,7 @@ import json
 import re
 import save_asin 
 import mongo_db
+import time
 
 url = "https://www.amazon.com/gp/site-directory/"
 # ch_url = "https://www.amazon.com/home-automation-smarthome/b/ref=sd_allcat_homaut?ie=UTF8&node=6563140011"
@@ -31,15 +32,29 @@ page_base = "https://www.amazon.com/s/ref=sr_pg_{}?rh={}&page={}&ie=UTF8"
 
 # 获取每页商品的地址、title
 def get_product_list(url):
+	proxies = {
+		'http':'182.162.141.7:80',
+	}
 	try:
-		r = requests.get(url, headers=headers)
+		r = requests.get(url, headers=headers, proxies=proxies)
 		soup = BeautifulSoup(r.text, 'lxml')
 	except:
 		print "#######GET_PRODUCT_LIST_ERROR:", url
 		return False
 	# one_page_urls =[]
 	product = soup.select('a.a-link-normal.s-access-detail-page.a-text-normal')
-	print "****page_product_list:", len(product)
+	asin = soup.select('div#atfResults > ul > li')
+	# 'a-link-normal s-access-detail-page a-text-normal'
+	# 'a-size-small a-link-normal a-text-normal'
+	# 'div#atfResults > ul > li'
+	print "****page_product_list:", len(product), 'status_code:', r.status_code
+	# print 'html:', r.text
+	print 'url:', url
+	print 'asin_list:', len(asin)
+	# print 'soup li[data-asin]', soup.select('li[data-asin]')
+	for l in soup.select('div#atfResults > ul > li'):
+		print 'data-asin:', i['data-asin']
+	time.sleep(300)
 	for p in product:
 		url = p['href']     # 商品的url地址
 		title = p['title']  # 商品的title
@@ -50,8 +65,11 @@ def get_product_list(url):
 
 # 根据final url获取改菜单总的页数
 def get_page_num(final_url):
+	proxies = {
+		'http':'104.224.37.59:3128',
+	}
 	try:
-		r = requests.get(final_url, headers=headers)
+		r = requests.get(final_url, headers=headers, proxies=proxies)
 		soup = BeautifulSoup(r.text, 'lxml')
 	except:
 		print '######## GET PAGE NUM ERROR:', final_url
@@ -59,6 +77,7 @@ def get_page_num(final_url):
 	page_num = soup.select('span.pagnDisabled')  # 获取总的页数
 
 	page = []
+	print 'page_num', page_num, 'status_code:', r.status_code
 	# 获取总的页数，如果没有总的页数，取最后一页的数
 	if not page_num: 
 		page_num = soup.select('span.pagnLink > a')
@@ -66,10 +85,10 @@ def get_page_num(final_url):
 	else:
 		page_num = page_num and page_num[0].text or 1
 	page = soup.select('span.pagnLink > a')
-	page_url_node = page and page[-1]['href']  # 取其中一页的url，解析其中的srs、rh、qid、ran_num的值
+	page_url_node = page and page[-1]['href'] or None  # 取其中一页的url，解析其中的srs、rh、qid、ran_num的值
 	print '****one_page_url_node', page_url_node  
 	if not page_url_node:
-		print '######page node Not Found#####',page
+		print '######Page Num Not Found#####',page
 		return False
 	# page_url_node 
 	# /s/ref=lp_7242007011_pg_3/166-1338711-6776612?rh=n%3A172282%2Cn%3A%21493964%2Cn%3A502394%2Cn%3A172435%2Cn%3A7242007011&page=3&ie=UTF8&qid=1474521868
