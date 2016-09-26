@@ -53,8 +53,8 @@ def get_product_list(url):
 	print 'asin_list:', len(asin)
 	# print 'soup li[data-asin]', soup.select('li[data-asin]')
 	for l in soup.select('div#atfResults > ul > li'):
-		print 'data-asin:', i['data-asin']
-	time.sleep(300)
+		print 'data-asin:', l['data-asin']
+#	time.sleep(300)
 	for p in product:
 		url = p['href']     # 商品的url地址
 		title = p['title']  # 商品的title
